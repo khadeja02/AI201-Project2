@@ -1,10 +1,5 @@
 # FitFindr — planning.md
 
-> Complete this document before writing any implementation code.
-> Your spec and agent diagram are what you'll use to direct AI tools (Claude, Copilot, etc.) to generate your implementation — the more specific they are, the more useful the generated code will be.
-> Your planning.md will be reviewed as part of your submission.
-> Update it before starting any stretch features.
-
 ---
 
 ## Tools
