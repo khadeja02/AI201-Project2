@@ -77,39 +77,15 @@ finished session once and maps it onto the three UI panels.
 
 ## Spec Reflection
 
-*(Fill this in from your own run of the project — two or three sentences
-each is plenty. Answer these two exact prompts:)*
+One way the spec helped: Writing out create_fit_card's failure mode in planning.md before touching code ("If outfit is empty/whitespace-only... return an Error: string immediately — no LLM call is attempted") meant I caught the guard-clause requirement early. If I'd started coding first, I likely would've let the empty-outfit case fall through to the LLM and just gotten a weird/wasted API call instead of a clean, testable error.
 
-- **One way the spec helped:** Look at `planning.md`'s Tool 2/3 specs —
-  did having the exact failure-mode description written down *before*
-  coding change how you (or the AI) handled the empty-wardrobe or
-  empty-outfit case? Say what would've gone differently without it.
-- **One way your implementation diverged from the spec, and why:** Run
-  `python agent.py` or the app with a few different queries. Did anything
-  come out differently than what you planned in `planning.md`'s walkthrough
-  — e.g. the parser handling a query you didn't originally think through,
-  or a tool's output format differing from what you specified? Name the
-  actual divergence you hit.
+One way my implementation diverged from the spec, and why: My original planning.md assumed run_agent would take pre-split description/size/max_price parameters. The actual starter stub takes a single free-text query string instead, which meant I had to add a _parse_query() regex step that wasn't in my original plan at all. I chose regex over an LLM-based parser so this step stays deterministic and testable without burning an API call just to extract "size M" from a sentence.
 
 ## AI Usage
 
-*(The assignment wants **your own** record of directing an AI tool and
-catching/fixing something in its output — not a description of AI writing
-the whole thing unsupervised. Two real, concrete instances. A filled-in
-example of the *shape* this should take:)*
+Instance 1 — search_listings: I gave Claude the Tool 1 spec from planning.md (exact params, return shape, and the requirement to return [] instead of raising on no match) and asked it to implement the function. Before trusting the output, I had it run the three example queries from the assignment directly — "vintage graphic tee" with a $30 cap, a deliberately impossible "designer ballgown" query, and a price-filter check — and confirmed each one matched or correctly returned empty. I did catch one thing I wanted changed: the first draft matched size exactly, so I asked for it to handle a case like a listing sized "S/M" matching a query for "M" — that's why the size check in tools.py does a substring comparison instead of exact equality.
 
-1. **[tool/file name]** — Gave [AI tool] the [exact spec section] from
-   `planning.md`. It produced [what it produced]. Before trusting it, I
-   checked [specific thing you checked — ran a specific test query, printed
-   a specific variable, re-read a specific line] and found [what matched or
-   didn't]. I changed/kept: ___
-2. **[tool/file name]** — same structure.
-
-If you worked through this with an AI assistant open in another tab, this
-is genuinely easy to fill in truthfully — you were reviewing generated code
-against a spec at almost every step. Write down the specific moment you
-caught something (a wrong return type, a missing guard clause, output that
-didn't match the failure-mode you'd written) rather than a generic summary.
+Instance 2 — the query parser: Since run_agent takes a single free-text string, I had Claude build a _parse_query() helper and directly tested it against all five example queries plus the long multi-sentence one in planning.md's walkthrough. It initially left filler words like "in" and "looking" sitting in the parsed description (e.g. "90s track jacket in" instead of "90s track jacket"), which I noticed by printing the parsed output — so I had it reuse the same stopword list search_listings already had, rather than write a second one, to keep the cleanup consistent.
 
 ## Tests
 
